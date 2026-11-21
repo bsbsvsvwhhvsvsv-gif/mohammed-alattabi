@@ -1,1 +1,484 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="docTitle">محمد صخي العتابي | المسرح والأدب والفن</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #08080a;
+      --surface: #111115;
+      --card: #16161c;
+      --text: #f5f5f4;
+      --muted: #a1a1aa;
+      --gold: #eab308;
+      --crimson: #9f1239;
+      --line: rgba(234, 179, 8, 0.22);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Tajawal", sans-serif;
+      overflow-x: hidden;
+    }
 
+    /* شاشة الترحيب السريعة الاحترافية */
+    #introCurtain {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 25%, rgba(234, 179, 8, 0.22), transparent 52%),
+        linear-gradient(135deg, #2a040e 0%, #09090b 55%, #2a040e 100%);
+      transition: opacity 0.65s ease, transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #introCurtain.hide {
+      opacity: 0;
+      transform: scale(1.05);
+      pointer-events: none;
+    }
+    .spotlight-beam {
+      position: absolute;
+      top: -20%;
+      width: 420px;
+      height: 130%;
+      background: linear-gradient(180deg, rgba(234, 179, 8, 0.26) 0%, rgba(234, 179, 8, 0.03) 65%, transparent 100%);
+      clip-path: polygon(38% 0%, 62% 0%, 100% 100%, 0% 100%);
+      animation: beamSwing 5s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes beamSwing {
+      0% { transform: translateX(-45px) rotate(-4deg); }
+      100% { transform: translateX(45px) rotate(4deg); }
+    }
+    .intro-kicker {
+      color: var(--gold);
+      letter-spacing: 1.5px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      z-index: 2;
+    }
+    .intro-name {
+      margin: 0;
+      font-family: "Amiri", serif;
+      font-size: clamp(2.4rem, 7vw, 4.4rem);
+      color: #fff;
+      text-shadow: 0 10px 35px rgba(0, 0, 0, 0.8);
+      z-index: 2;
+    }
+    .intro-enter {
+      margin-top: 24px;
+      z-index: 2;
+      background: var(--gold);
+      color: #09090b;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 0 28px rgba(234, 179, 8, 0.4);
+      transition: transform 0.2s ease;
+    }
+    .intro-enter:hover { transform: translateY(-2px); }
+
+    /* الهيدر العلوي */
+    header.site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(8, 8, 10, 0.82);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .nav-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      font-family: "Amiri", serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      font-size: 0.95rem;
+    }
+    .nav-links a {
+      color: var(--text);
+      text-decoration: none;
+      opacity: 0.85;
+      transition: 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold); opacity: 1; }
+    .btn-admin {
+      border: 1px solid var(--line);
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: rgba(234, 179, 8, 0.08);
+      color: var(--gold) !important;
+      font-weight: 700;
+    }
+
+    /* الواجهة المسرحية الموسعة المتحركة */
+    .stage-hero {
+      position: relative;
+      min-height: 76vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+    .stage-bg-slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: scale(1);
+      transition: opacity 1.2s ease, transform 9s ease;
+    }
+    .stage-bg-slide.active {
+      opacity: 0.42;
+      transform: scale(1.09);
+    }
+    .stage-overlay {
+      position: relative;
+      z-index: 2;
+      max-width: 1180px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 70px 20px;
+      background: linear-gradient(90deg, rgba(8, 8, 10, 0.92) 0%, rgba(8, 8, 10, 0.65) 60%, rgba(8, 8, 10, 0.35) 100%);
+    }
+    .stage-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(159, 18, 57, 0.35);
+      border: 1px solid rgba(234, 179, 8, 0.4);
+      color: var(--gold);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .stage-hero h1 {
+      margin: 0 0 14px;
+      font-family: "Amiri", serif;
+      font-size: clamp(2.4rem, 6vw, 4.2rem);
+      line-height: 1.15;
+      color: #fff;
+    }
+    .stage-hero p {
+      margin: 0 0 26px;
+      max-width: 690px;
+      color: #e4e4e7;
+      font-size: 1.12rem;
+      line-height: 1.8;
+    }
+    .hero-cta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .cta-primary {
+      background: var(--gold);
+      color: #09090b;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 800;
+    }
+    .cta-secondary {
+      background: rgba(255, 255, 255, 0.07);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+
+    /* الأقسام الموسعة */
+    .container { max-width: 1180px; margin: 0 auto; padding: 64px 20px; }
+    .sec-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 26px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 14px;
+    }
+    .sec-head h2 {
+      margin: 0;
+      font-family: "Amiri", serif;
+      font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+      color: var(--gold);
+    }
+    .about-box {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 28px;
+      font-size: 1.08rem;
+      line-height: 1.95;
+      color: #e4e4e7;
+    }
+
+    /* معرض المشاهد المسرحية المتحركة */
+    .stage-reel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
+    .reel-card {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      height: 270px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--card);
+    }
+    .reel-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+      display: block;
+    }
+    .reel-card:hover img { transform: scale(1.1); }
+    .reel-cap {
+      position: absolute;
+      inset: auto 0 0 0;
+      padding: 36px 16px 16px;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.88));
+      font-weight: 700;
+      color: #fff;
+      font-size: 0.98rem;
+    }
+
+    /* شبكة الأعمال والنصوص */
+    .works-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 22px;
+    }
+    .work-card {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 18px;
+      overflow: hidden;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+    .work-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--gold);
+    }
+    .work-card img {
+      width: 100%;
+      height: 215px;
+      object-fit: cover;
+      display: block;
+    }
+    .work-body { padding: 20px; }
+    .work-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--gold);
+      font-size: 0.84rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .work-card h3 {
+      margin: 0 0 10px;
+      font-family: "Amiri", serif;
+      font-size: 1.45rem;
+      color: #fff;
+    }
+    .work-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.8;
+      white-space: pre-line;
+    }
+
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 28px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- شاشة الترحيب السريعة -->
+  <div id="introCurtain">
+    <div class="spotlight-beam"></div>
+    <div class="intro-kicker" id="introKicker">الستار يُرفع الآن</div>
+    <h1 class="intro-name" id="introName">محمد صخي العتابي</h1>
+    <button id="enterBtn" class="intro-enter" type="button">دخول المنصة</button>
+  </div>
+
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="#top" id="navBrand">محمد صخي العتابي</a>
+      <nav class="nav-links">
+        <a href="#about">السيرة والرؤية</a>
+        <a href="#gallery">مشاهد المسرح</a>
+        <a href="#works">الأعمال والنصوص</a>
+        <a class="btn-admin" href="./admin.html">الإدارة</a>
+      </nav>
+    </div>
+  </header>
+
+  <section id="top" class="stage-hero">
+    <div id="heroSlides"></div>
+    <div class="stage-overlay">
+      <div class="stage-badge" id="heroBadge">الستار يُرفع الآن</div>
+      <h1 id="heroTitle">محمد صخي العتابي</h1>
+      <p id="heroSubtitle"></p>
+      <div class="hero-cta">
+        <a class="cta-primary" href="#works">استعراض الأعمال</a>
+        <a class="cta-secondary" href="#gallery">مشاهد مسرحية</a>
+      </div>
+    </div>
+  </section>
+
+  <main class="container">
+    <section id="about" style="margin-bottom: 64px;">
+      <div class="sec-head">
+        <h2 id="aboutTitle">عن الفنان والأستاذ المسرحي</h2>
+      </div>
+      <div class="about-box">
+        <p id="aboutText"></p>
+      </div>
+    </section>
+
+    <section id="gallery" style="margin-bottom: 64px;">
+      <div class="sec-head">
+        <h2>مشاهد وأجواء مسرحية</h2>
+      </div>
+      <div id="galleryGrid" class="stage-reel"></div>
+    </section>
+
+    <section id="works">
+      <div class="sec-head">
+        <h2>الأعمال والنصوص المسرحية والأدبية</h2>
+      </div>
+      <div id="worksGrid" class="works-grid"></div>
+    </section>
+  </main>
+
+  <footer>
+    محمد صخي العتابي — المنصة المسرحية والأدبية
+  </footer>
+
+  <script>
+    const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+    function closeIntro() {
+      const el = document.getElementById("introCurtain");
+      if (el) el.classList.add("hide");
+    }
+    document.getElementById("enterBtn").addEventListener("click", closeIntro);
+    setTimeout(closeIntro, 1800);
+
+    function startHeroSlides(images) {
+      const wrap = document.getElementById("heroSlides");
+      const list = images.length ? images : ["https://images.unsplash.com/photo-1507924538820-ede94a04019d?auto=format&fit=crop&w=1400&q=80"];
+      wrap.innerHTML = list.map((src, i) =>
+        `<div class="stage-bg-slide ${i === 0 ? "active" : ""}" style="background-image:url('${esc(src)}')"></div>`
+      ).join("");
+      const slides = wrap.querySelectorAll(".stage-bg-slide");
+      if (slides.length > 1) {
+        let cur = 0;
+        setInterval(() => {
+          slides[cur].classList.remove("active");
+          cur = (cur + 1) % slides.length;
+          slides[cur].classList.add("active");
+        }, 4500);
+      }
+    }
+
+    async function init() {
+      try {
+        const res = await fetch(`./data.json?v=${Date.now()}`, { cache: "no-store" });
+        const d = await res.json();
+
+        if (d.siteTitle) document.getElementById("docTitle").textContent = d.siteTitle;
+        if (d.welcomeLabel) {
+          document.getElementById("introKicker").textContent = d.welcomeLabel;
+          document.getElementById("heroBadge").textContent = d.welcomeLabel;
+        }
+        if (d.heroTitle) {
+          document.getElementById("introName").textContent = d.heroTitle;
+          document.getElementById("navBrand").textContent = d.heroTitle;
+          document.getElementById("heroTitle").textContent = d.heroTitle;
+        }
+        if (d.heroSubtitle) document.getElementById("heroSubtitle").textContent = d.heroSubtitle;
+        if (d.aboutTitle) document.getElementById("aboutTitle").textContent = d.aboutTitle;
+        if (d.aboutText) document.getElementById("aboutText").textContent = d.aboutText;
+
+        const gal = Array.isArray(d.gallery) ? d.gallery : [];
+        startHeroSlides(gal.map((x) => x.image).filter(Boolean));
+
+        document.getElementById("galleryGrid").innerHTML = gal.map((g) => `
+          <div class="reel-card">
+            <img src="${esc(g.image)}" alt="${esc(g.caption)}" loading="lazy" />
+            <div class="reel-cap">${esc(g.caption || "مشهد مسرحي")}</div>
+          </div>
+        `).join("");
+
+        const items = Array.isArray(d.items) ? d.items : [];
+        document.getElementById("worksGrid").innerHTML = items.map((it) => `
+          <article class="work-card">
+            ${it.image ? `<img src="${esc(it.image)}" alt="${esc(it.title)}" loading="lazy" />` : ""}
+            <div class="work-body">
+              <div class="work-meta">
+                <span>${esc(it.type || "نص")}</span>
+                <span>${esc(it.date || "")}</span>
+              </div>
+              <h3>${esc(it.title || "")}</h3>
+              <p>${esc(it.summary || "")}</p>
+            </div>
+          </article>
+        `).join("");
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
