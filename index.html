@@ -126,7 +126,7 @@
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 18px;
+      gap: 14px;
       flex-wrap: wrap;
       font-size: 0.95rem;
     }
@@ -137,6 +137,18 @@
       transition: 0.2s;
     }
     .nav-links a:hover { color: var(--gold); opacity: 1; }
+    .lang-select {
+      background: var(--card);
+      color: var(--gold);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      outline: none;
+    }
     .btn-admin {
       border: 1px solid var(--line);
       padding: 7px 14px;
@@ -286,17 +298,19 @@
       font-size: 0.98rem;
     }
 
-    /* شبكة الأعمال والنصوص */
+    /* شبكة الأعمال والنصوص مع فتح وطي بالضغط */
     .works-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
       gap: 22px;
+      align-items: start;
     }
     .work-card {
       background: var(--card);
       border: 1px solid rgba(255, 255, 255, 0.09);
       border-radius: 18px;
       overflow: hidden;
+      cursor: pointer;
       transition: transform 0.3s ease, border-color 0.3s ease;
     }
     .work-card:hover {
@@ -319,16 +333,38 @@
       margin-bottom: 8px;
     }
     .work-card h3 {
-      margin: 0 0 10px;
+      margin: 0 0 12px;
       font-family: "Amiri", serif;
       font-size: 1.45rem;
       color: #fff;
+    }
+    .toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(234, 179, 8, 0.12);
+      color: var(--gold);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .work-content {
+      display: none;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.09);
+    }
+    .work-card.open .work-content {
+      display: block;
     }
     .work-card p {
       margin: 0;
       color: var(--muted);
       font-size: 0.98rem;
-      line-height: 1.8;
+      line-height: 1.85;
       white-space: pre-line;
     }
 
@@ -354,10 +390,18 @@
     <div class="nav-inner">
       <a class="brand" href="#top" id="navBrand">محمد صخي العتابي</a>
       <nav class="nav-links">
-        <a href="#about">السيرة والرؤية</a>
-        <a href="#gallery">مشاهد المسرح</a>
-        <a href="#works">الأعمال والنصوص</a>
-        <a class="btn-admin" href="./admin.html">الإدارة</a>
+        <a href="#about" id="navAbout">السيرة والرؤية</a>
+        <a href="#gallery" id="navGallery">مشاهد المسرح</a>
+        <a href="#works" id="navWorks">الأعمال والنصوص</a>
+        <select id="langSelect" class="lang-select" aria-label="Language">
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+          <option value="es">Español</option>
+          <option value="de">Deutsch</option>
+        </select>
+        <a class="btn-admin" href="./admin.html" id="navAdmin">الإدارة</a>
       </nav>
     </div>
   </header>
@@ -369,8 +413,8 @@
       <h1 id="heroTitle">محمد صخي العتابي</h1>
       <p id="heroSubtitle"></p>
       <div class="hero-cta">
-        <a class="cta-primary" href="#works">استعراض الأعمال</a>
-        <a class="cta-secondary" href="#gallery">مشاهد مسرحية</a>
+        <a class="cta-primary" href="#works" id="ctaWorks">استعراض الأعمال</a>
+        <a class="cta-secondary" href="#gallery" id="ctaGallery">مشاهد مسرحية</a>
       </div>
     </div>
   </section>
@@ -387,25 +431,113 @@
 
     <section id="gallery" style="margin-bottom: 64px;">
       <div class="sec-head">
-        <h2>مشاهد وأجواء مسرحية</h2>
+        <h2 id="galleryHeading">مشاهد وأجواء مسرحية</h2>
       </div>
       <div id="galleryGrid" class="stage-reel"></div>
     </section>
 
     <section id="works">
       <div class="sec-head">
-        <h2>الأعمال والنصوص المسرحية والأدبية</h2>
+        <h2 id="worksHeading">الأعمال والنصوص المسرحية والأدبية</h2>
       </div>
       <div id="worksGrid" class="works-grid"></div>
     </section>
   </main>
 
-  <footer>
+  <footer id="footerText">
     محمد صخي العتابي — المنصة المسرحية والأدبية
   </footer>
 
   <script>
     const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+    const UI_LANGS = {
+      ar: {
+        dir: "rtl", enter: "دخول المنصة", about: "السيرة والرؤية", gallery: "مشاهد المسرح",
+        works: "الأعمال والنصوص", admin: "الإدارة", ctaWorks: "استعراض الأعمال",
+        ctaGallery: "مشاهد مسرحية", gallerySec: "مشاهد وأجواء مسرحية",
+        worksSec: "الأعمال والنصوص المسرحية والأدبية", openTxt: "عرض النص والشرح",
+        closeTxt: "إخفاء النص", footer: "محمد صخي العتابي — المنصة المسرحية والأدبية"
+      },
+      en: {
+        dir: "ltr", enter: "Enter Stage", about: "Biography & Vision", gallery: "Stage Scenes",
+        works: "Plays & Texts", admin: "Admin", ctaWorks: "Explore Plays",
+        ctaGallery: "Stage Scenes", gallerySec: "Theatrical Scenes & Atmosphere",
+        worksSec: "Theatrical Works, Plays & Literature", openTxt: "Read Play & Synopsis",
+        closeTxt: "Hide Text", footer: "Mohammed Sakhi Al-Attabi — Theatre & Literary Platform"
+      },
+      fr: {
+        dir: "ltr", enter: "Entrer sur Scène", about: "Biographie & Vision", gallery: "Scènes de Théâtre",
+        works: "Pièces & Textes", admin: "Admin", ctaWorks: "Découvrir les Pièces",
+        ctaGallery: "Scènes de Théâtre", gallerySec: "Scènes & Atmosphère Théâtrale",
+        worksSec: "Œuvres Théâtrales, Pièces & Littérature", openTxt: "Lire le Texte & Résumé",
+        closeTxt: "Masquer le Texte", footer: "Mohammed Sakhi Al-Attabi — Plateforme Théâtrale & Littéraire"
+      },
+      ru: {
+        dir: "ltr", enter: "Войти на сцену", about: "Биография и взгляд", gallery: "Сценические кадры",
+        works: "Пьесы и тексты", admin: "Админ", ctaWorks: "Смотреть пьесы",
+        ctaGallery: "Сценические кадры", gallerySec: "Театральные сцены и атмосфера",
+        worksSec: "Театральные работы, пьесы и литература", openTxt: "Открыть текст и описание",
+        closeTxt: "Скрыть текст", footer: "Мохаммед Сахи Аль-Аттаби — Театральная и литературная платформа"
+      },
+      es: {
+        dir: "ltr", enter: "Entrar a Escena", about: "Biografía y Visión", gallery: "Escenas Teatrales",
+        works: "Obras y Textos", admin: "Admin", ctaWorks: "Ver Obras",
+        ctaGallery: "Escenas Teatrales", gallerySec: "Escenas y Atmósfera Teatral",
+        worksSec: "Obras Teatrales, Dramaturgia y Literatura", openTxt: "Leer Texto y Sinopsis",
+        closeTxt: "Ocultar Texto", footer: "Mohammed Sakhi Al-Attabi — Plataforma Teatral y Literaria"
+      },
+      de: {
+        dir: "ltr", enter: "Bühne betreten", about: "Biografie & Vision", gallery: "Bühnenbilder",
+        works: "Stücke & Texte", admin: "Admin", ctaWorks: "Stücke ansehen",
+        ctaGallery: "Bühnenbilder", gallerySec: "Theatermomente & Atmosphäre",
+        worksSec: "Theaterwerke, Stücke & Literatur", openTxt: "Text & Inhalt anzeigen",
+        closeTxt: "Text ausblenden", footer: "Mohammed Sakhi Al-Attabi — Theater- & Literaturplattform"
+      }
+    };
+
+    let currentLang = "ar";
+
+    function applyLang(lang) {
+      currentLang = UI_LANGS[lang] ? lang : "ar";
+      const t = UI_LANGS[currentLang];
+      document.documentElement.lang = currentLang;
+      document.documentElement.dir = t.dir;
+      document.getElementById("enterBtn").textContent = t.enter;
+      document.getElementById("navAbout").textContent = t.about;
+      document.getElementById("navGallery").textContent = t.gallery;
+      document.getElementById("navWorks").textContent = t.works;
+      document.getElementById("navAdmin").textContent = t.admin;
+      document.getElementById("ctaWorks").textContent = t.ctaWorks;
+      document.getElementById("ctaGallery").textContent = t.ctaGallery;
+      document.getElementById("galleryHeading").textContent = t.gallerySec;
+      document.getElementById("worksHeading").textContent = t.worksSec;
+      document.getElementById("footerText").textContent = t.footer;
+
+      document.querySelectorAll(".work-card").forEach((card) => {
+        const btn = card.querySelector(".toggle-btn");
+        if (btn) btn.textContent = card.classList.contains("open") ? t.closeTxt : t.openTxt;
+      });
+    }
+
+    function trackAnalytics(eventType, title = "") {
+      try {
+        const key = "alattabi_stats_v1";
+        const raw = JSON.parse(localStorage.getItem(key) || "{}");
+        const today = new Date().toISOString().slice(0, 10);
+        raw.totalVisits = Number(raw.totalVisits || 0);
+        raw.dailyVisits = raw.dailyVisits && typeof raw.dailyVisits === "object" ? raw.dailyVisits : {};
+        raw.playClicks = raw.playClicks && typeof raw.playClicks === "object" ? raw.playClicks : {};
+
+        if (eventType === "visit") {
+          raw.totalVisits += 1;
+          raw.dailyVisits[today] = Number(raw.dailyVisits[today] || 0) + 1;
+        } else if (eventType === "open_play" && title) {
+          raw.playClicks[title] = Number(raw.playClicks[title] || 0) + 1;
+        }
+        localStorage.setItem(key, JSON.stringify(raw));
+      } catch (_) {}
+    }
 
     function closeIntro() {
       const el = document.getElementById("introCurtain");
@@ -413,6 +545,10 @@
     }
     document.getElementById("enterBtn").addEventListener("click", closeIntro);
     setTimeout(closeIntro, 1800);
+
+    document.getElementById("langSelect").addEventListener("change", (e) => {
+      applyLang(e.target.value);
+    });
 
     function startHeroSlides(images) {
       const wrap = document.getElementById("heroSlides");
@@ -432,6 +568,7 @@
     }
 
     async function init() {
+      trackAnalytics("visit");
       try {
         const res = await fetch(`./data.json?v=${Date.now()}`, { cache: "no-store" });
         const d = await res.json();
@@ -461,8 +598,10 @@
         `).join("");
 
         const items = Array.isArray(d.items) ? d.items : [];
-        document.getElementById("worksGrid").innerHTML = items.map((it) => `
-          <article class="work-card">
+        const t = UI_LANGS[currentLang];
+        const worksGrid = document.getElementById("worksGrid");
+        worksGrid.innerHTML = items.map((it) => `
+          <article class="work-card" data-play-title="${esc(it.title || "")}">
             ${it.image ? `<img src="${esc(it.image)}" alt="${esc(it.title)}" loading="lazy" />` : ""}
             <div class="work-body">
               <div class="work-meta">
@@ -470,10 +609,25 @@
                 <span>${esc(it.date || "")}</span>
               </div>
               <h3>${esc(it.title || "")}</h3>
-              <p>${esc(it.summary || "")}</p>
+              <button type="button" class="toggle-btn">${t.openTxt}</button>
+              <div class="work-content">
+                <p>${esc(it.summary || "")}</p>
+              </div>
             </div>
           </article>
         `).join("");
+
+        worksGrid.querySelectorAll(".work-card").forEach((card) => {
+          card.addEventListener("click", () => {
+            const isOpen = card.classList.toggle("open");
+            const btn = card.querySelector(".toggle-btn");
+            const langPack = UI_LANGS[currentLang];
+            if (btn) btn.textContent = isOpen ? langPack.closeTxt : langPack.openTxt;
+            if (isOpen) {
+              trackAnalytics("open_play", card.dataset.playTitle || "");
+            }
+          });
+        });
       } catch (e) {
         console.error(e);
       }
