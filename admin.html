@@ -44,6 +44,18 @@
       border-bottom: 1px solid var(--border); padding-bottom: 8px;
     }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .stat-box {
+      background: var(--panel-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px;
+    }
+    .stat-label { font-size: 0.85rem; color: var(--muted); margin-bottom: 4px; }
+    .stat-num { font-size: 1.5rem; font-weight: 700; color: var(--gold); }
+    .top-plays { list-style: none; margin: 0; padding: 0; }
+    .top-plays li {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 9px 12px; margin-bottom: 8px; font-size: 0.92rem;
+    }
     label { display: block; font-size: 0.88rem; color: var(--muted); margin-bottom: 6px; }
     input, textarea, select {
       width: 100%; background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
@@ -106,6 +118,30 @@
 
     <div id="workspace" class="hidden">
       <div class="card">
+        <h2>إحصائيات الزيارات والمسرحيات</h2>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">إجمالي زيارات الموقع</div>
+            <div class="stat-num" id="totalVisitsNum">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">زيارات اليوم</div>
+            <div class="stat-num" id="todayVisitsNum">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">عدد الأعمال المسرحية</div>
+            <div class="stat-num" id="worksCountNum">0</div>
+          </div>
+        </div>
+        <div class="stat-label" style="margin-bottom:8px;">أكثر المسرحيات فتحاً وقراءة</div>
+        <ul id="topPlaysList" class="top-plays"></ul>
+        <div class="actions">
+          <button id="refreshStatsBtn" class="btn-dark" type="button">تحديث الإحصائيات</button>
+          <button id="resetStatsBtn" class="btn-del" type="button">تصفير العداد</button>
+        </div>
+      </div>
+
+      <div class="card">
         <h2>واجهة الترحيب والهوية</h2>
         <div class="grid">
           <div>
@@ -166,6 +202,7 @@
             <label for="newType">التصنيف</label>
             <select id="newType">
               <option value="نص مسرحي">نص مسرحي</option>
+              <option value="مسرح أطفال">مسرح أطفال</option>
               <option value="رؤية إخراجية">رؤية إخراجية</option>
               <option value="أدب ونقد">أدب ونقد</option>
               <option value="مقالات">مقالات</option>
@@ -239,6 +276,28 @@
       el.className = `msg show ${kind}`;
     }
 
+    function renderStats() {
+      const raw = JSON.parse(localStorage.getItem("alattabi_stats_v1") || "{}");
+      const today = new Date().toISOString().slice(0, 10);
+      const total = Number(raw.totalVisits || 0);
+      const todayCount = Number((raw.dailyVisits && raw.dailyVisits[today]) || 0);
+      const clicksObj = raw.playClicks && typeof raw.playClicks === "object" ? raw.playClicks : {};
+
+      $("totalVisitsNum").textContent = String(total);
+      $("todayVisitsNum").textContent = String(todayCount);
+      $("worksCountNum").textContent = String(state.items.length);
+
+      const sorted = Object.entries(clicksObj).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      const ul = $("topPlaysList");
+      if (!sorted.length) {
+        ul.innerHTML = `<li><span>لا توجد مسرحيات مفتوحة مسجلة بعد</span><span class="tag">0</span></li>`;
+        return;
+      }
+      ul.innerHTML = sorted.map(([name, count]) =>
+        `<li><span>${esc(name)}</span><span class="tag">${esc(count)} فتح</span></li>`
+      ).join("");
+    }
+
     function toB64(str) {
       const bytes = new TextEncoder().encode(str);
       let bin = "";
@@ -309,6 +368,7 @@
       $("heroSubtitle").value = state.heroSubtitle;
       $("aboutTitle").value = state.aboutTitle;
       $("aboutText").value = state.aboutText;
+      renderStats();
       renderGallery();
       renderWorks();
     }
@@ -348,6 +408,7 @@
     function renderWorks() {
       const box = $("worksList");
       box.innerHTML = "";
+      $("worksCountNum").textContent = String(state.items.length);
       state.items.forEach((it, idx) => {
         const div = document.createElement("div");
         div.className = "entry";
@@ -379,6 +440,12 @@
         });
       });
     }
+
+    $("refreshStatsBtn").addEventListener("click", renderStats);
+    $("resetStatsBtn").addEventListener("click", () => {
+      localStorage.removeItem("alattabi_stats_v1");
+      renderStats();
+    });
 
     $("unlockBtn").addEventListener("click", async () => {
       const pass = $("passInput").value.trim();
