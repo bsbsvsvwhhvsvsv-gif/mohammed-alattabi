@@ -1,1 +1,492 @@
-admin.html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إدارة المنصة المسرحية | محمد صخي العتابي</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #09090b;
+      --panel: #121216;
+      --panel-2: #19191f;
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --crimson: #9f1239;
+      --gold: #eab308;
+      --gold-soft: rgba(234, 179, 8, 0.14);
+      --border: rgba(255, 255, 255, 0.1);
+      --ok: #22c55e;
+      --err: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #1d0c14 0%, var(--bg) 55%);
+      color: var(--text);
+      font-family: "Tajawal", sans-serif;
+      line-height: 1.65;
+    }
+    .container { max-width: 980px; margin: 0 auto; padding: 24px 16px 70px; }
+    .topbar {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+      background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px; margin-bottom: 20px;
+    }
+    .topbar h1 { margin: 0; font-family: "Amiri", serif; font-size: 1.55rem; color: var(--gold); }
+    .topbar p { margin: 3px 0 0; color: var(--muted); font-size: 0.9rem; }
+    .card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px;
+    }
+    .card h2 {
+      margin: 0 0 14px; font-family: "Amiri", serif; font-size: 1.35rem; color: var(--gold);
+      border-bottom: 1px solid var(--border); padding-bottom: 8px;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    label { display: block; font-size: 0.88rem; color: var(--muted); margin-bottom: 6px; }
+    input, textarea, select {
+      width: 100%; background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 13px; font-family: inherit; font-size: 0.95rem; outline: none;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--gold); }
+    textarea { min-height: 95px; resize: vertical; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    button {
+      border: none; border-radius: 10px; padding: 11px 18px; font-family: inherit; font-weight: 700;
+      font-size: 0.92rem; cursor: pointer; transition: 0.2s;
+    }
+    .btn-gold { background: var(--gold); color: #09090b; }
+    .btn-gold:hover { filter: brightness(1.08); }
+    .btn-crimson { background: var(--crimson); color: #fff; }
+    .btn-dark { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
+    .btn-del { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
+    .msg { margin-top: 12px; padding: 10px 14px; border-radius: 10px; font-size: 0.9rem; display: none; }
+    .msg.show { display: block; }
+    .msg.ok { background: rgba(34, 197, 94, 0.14); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.35); }
+    .msg.err { background: rgba(239, 68, 68, 0.14); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
+    .entry { background: var(--panel-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+    .entry-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .tag { background: var(--gold-soft); color: var(--gold); padding: 3px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
+    .thumb { width: 110px; height: 70px; object-fit: cover; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border); }
+    .hidden { display: none; }
+    a.back { color: var(--gold); text-decoration: none; font-size: 0.92rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1>لوحة تحكم الفنان والأدمن</h1>
+        <p>إدارة نصوص، صور المسرح، والأعمال الفنية</p>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <a class="back" href="./index.html">الموقع الرسمي ←</a>
+        <button id="logoutBtn" class="btn-del hidden" type="button">خروج</button>
+      </div>
+    </div>
+
+    <div id="gateCard" class="card">
+      <h2>دخول الإدارة</h2>
+      <div class="grid">
+        <div>
+          <label for="passInput">كلمة السر</label>
+          <input id="passInput" type="password" placeholder="أدخل كلمة السر" />
+        </div>
+        <div>
+          <label for="tokenInput">رمز الحفظ على المستودع (GitHub Token)</label>
+          <input id="tokenInput" type="password" placeholder="ghp_..." autocomplete="off" />
+        </div>
+      </div>
+      <div class="actions">
+        <button id="unlockBtn" class="btn-gold" type="button">دخول</button>
+      </div>
+      <div id="gateMsg" class="msg"></div>
+    </div>
+
+    <div id="workspace" class="hidden">
+      <div class="card">
+        <h2>واجهة الترحيب والهوية</h2>
+        <div class="grid">
+          <div>
+            <label for="siteTitle">عنوان الصفحة</label>
+            <input id="siteTitle" type="text" />
+          </div>
+          <div>
+            <label for="welcomeLabel">عبارة الترحيب العلوية</label>
+            <input id="welcomeLabel" type="text" />
+          </div>
+          <div>
+            <label for="heroTitle">الاسم / العنوان البارز</label>
+            <input id="heroTitle" type="text" />
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <label for="heroSubtitle">المقدمة المسرحية والأدبية</label>
+          <textarea id="heroSubtitle"></textarea>
+        </div>
+        <div class="grid" style="margin-top:12px;">
+          <div>
+            <label for="aboutTitle">عنوان قسم السيرة / الرؤية</label>
+            <input id="aboutTitle" type="text" />
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <label for="aboutText">النص التعريفي الموسع</label>
+          <textarea id="aboutText"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>صور المشاهد المسرحية المتحركة في الواجهة</h2>
+        <div id="galleryList"></div>
+        <div class="grid" style="margin-top:12px;">
+          <div>
+            <label for="galCaption">وصف المشهد المسرحي</label>
+            <input id="galCaption" type="text" placeholder="مثال: لحظة ذروة على خشبة المسرح" />
+          </div>
+          <div>
+            <label for="galUrl">رابط صورة (أو ارفع صورة)</label>
+            <input id="galUrl" type="text" placeholder="https://..." />
+          </div>
+          <div>
+            <label for="galFile">رفع صورة من الجهاز</label>
+            <input id="galFile" type="file" accept="image/*" />
+          </div>
+        </div>
+        <div class="actions">
+          <button id="addGalBtn" class="btn-dark" type="button">+ إضافة مشهد مسرحي</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>إضافة عمل مسرحي أو نص جديد</h2>
+        <div class="grid">
+          <div>
+            <label for="newType">التصنيف</label>
+            <select id="newType">
+              <option value="نص مسرحي">نص مسرحي</option>
+              <option value="رؤية إخراجية">رؤية إخراجية</option>
+              <option value="أدب ونقد">أدب ونقد</option>
+              <option value="مقالات">مقالات</option>
+            </select>
+          </div>
+          <div>
+            <label for="newTitle">العنوان</label>
+            <input id="newTitle" type="text" />
+          </div>
+          <div>
+            <label for="newDate">السنة</label>
+            <input id="newDate" type="text" placeholder="2026" />
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <label for="newSummary">المحتوى أو الملخص</label>
+          <textarea id="newSummary"></textarea>
+        </div>
+        <div class="grid" style="margin-top:12px;">
+          <div>
+            <label for="newImgUrl">رابط صورة (اختياري)</label>
+            <input id="newImgUrl" type="text" />
+          </div>
+          <div>
+            <label for="newImgFile">رفع صورة من الجهاز</label>
+            <input id="newImgFile" type="file" accept="image/*" />
+          </div>
+        </div>
+        <div class="actions">
+          <button id="addWorkBtn" class="btn-crimson" type="button">+ إضافة العمل</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>الأعمال المنشورة</h2>
+        <div id="worksList"></div>
+        <div class="actions">
+          <button id="publishBtn" class="btn-gold" type="button">حفظ ونشر التغييرات على الموقع</button>
+          <button id="refreshBtn" class="btn-dark" type="button">إعادة تحميل البيانات</button>
+        </div>
+        <div id="saveMsg" class="msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const OWNER = "bsbsvsvwhhvsvsv-gif";
+    const REPO = "mohammed-alattabi";
+    const BRANCH = "main";
+    const DATA_PATH = "data.json";
+    const PASS_CODE = "M1969";
+
+    let token = "";
+    let sha = "";
+    let state = {
+      siteTitle: "",
+      welcomeLabel: "",
+      heroTitle: "",
+      heroSubtitle: "",
+      aboutTitle: "",
+      aboutText: "",
+      gallery: [],
+      items: []
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+    function showMsg(el, text, kind = "ok") {
+      el.textContent = text;
+      el.className = `msg show ${kind}`;
+    }
+
+    function toB64(str) {
+      const bytes = new TextEncoder().encode(str);
+      let bin = "";
+      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin);
+    }
+
+    function fromB64(b64) {
+      const bin = atob(b64.replace(/\n/g, ""));
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return new TextDecoder().decode(bytes);
+    }
+
+    async function ghApi(path, opts = {}) {
+      const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}${path}`, {
+        ...opts,
+        headers: {
+          "Accept": "application/vnd.github+json",
+          "Authorization": `Bearer ${token}`,
+          ...(opts.headers || {})
+        }
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.message || `خطأ ${r.status}`);
+      }
+      return r.json();
+    }
+
+    async function uploadFile(file) {
+      const clean = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const path = `uploads/${clean}`;
+      const base64 = await new Promise((res, rej) => {
+        const fr = new FileReader();
+        fr.onload = () => res(String(fr.result).split(",")[1]);
+        fr.onerror = rej;
+        fr.readAsDataURL(file);
+      });
+      const up = await ghApi(`/contents/${path}`, {
+        method: "PUT",
+        body: JSON.stringify({ message: `رفع ${clean}`, content: base64, branch: BRANCH })
+      });
+      return up.content?.download_url || `https://${OWNER}.github.io/${REPO}/${path}`;
+    }
+
+    async function loadData() {
+      const file = await ghApi(`/contents/${DATA_PATH}?ref=${BRANCH}`);
+      sha = file.sha;
+      const parsed = JSON.parse(fromB64(file.content));
+      state = {
+        siteTitle: parsed.siteTitle || "",
+        welcomeLabel: parsed.welcomeLabel || "",
+        heroTitle: parsed.heroTitle || "",
+        heroSubtitle: parsed.heroSubtitle || "",
+        aboutTitle: parsed.aboutTitle || "",
+        aboutText: parsed.aboutText || "",
+        gallery: Array.isArray(parsed.gallery) ? parsed.gallery : [],
+        items: Array.isArray(parsed.items) ? parsed.items : []
+      };
+      renderAll();
+    }
+
+    function renderAll() {
+      $("siteTitle").value = state.siteTitle;
+      $("welcomeLabel").value = state.welcomeLabel;
+      $("heroTitle").value = state.heroTitle;
+      $("heroSubtitle").value = state.heroSubtitle;
+      $("aboutTitle").value = state.aboutTitle;
+      $("aboutText").value = state.aboutText;
+      renderGallery();
+      renderWorks();
+    }
+
+    function renderGallery() {
+      const box = $("galleryList");
+      box.innerHTML = "";
+      state.gallery.forEach((g, idx) => {
+        const div = document.createElement("div");
+        div.className = "entry";
+        div.innerHTML = `
+          <div class="entry-head">
+            <span class="tag">مشهد #${idx + 1}</span>
+            <button type="button" class="btn-del" data-gdel="${idx}">حذف</button>
+          </div>
+          <div class="grid">
+            <div><label>الوصف</label><input type="text" data-gfield="caption" data-gidx="${idx}" value="${esc(g.caption)}" /></div>
+            <div><label>رابط الصورة</label><input type="text" data-gfield="image" data-gidx="${idx}" value="${esc(g.image)}" /></div>
+          </div>
+          ${g.image ? `<img class="thumb" src="${esc(g.image)}" alt="" />` : ""}
+        `;
+        box.appendChild(div);
+      });
+      box.querySelectorAll("[data-gfield]").forEach((el) => {
+        el.addEventListener("input", (e) => {
+          state.gallery[Number(e.target.dataset.gidx)][e.target.dataset.gfield] = e.target.value;
+        });
+      });
+      box.querySelectorAll("[data-gdel]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          state.gallery.splice(Number(e.target.dataset.gdel), 1);
+          renderGallery();
+        });
+      });
+    }
+
+    function renderWorks() {
+      const box = $("worksList");
+      box.innerHTML = "";
+      state.items.forEach((it, idx) => {
+        const div = document.createElement("div");
+        div.className = "entry";
+        div.innerHTML = `
+          <div class="entry-head">
+            <span class="tag">${esc(it.type || "عمل")}</span>
+            <button type="button" class="btn-del" data-wdel="${idx}">حذف</button>
+          </div>
+          <div class="grid">
+            <div><label>العنوان</label><input type="text" data-wfield="title" data-widx="${idx}" value="${esc(it.title)}" /></div>
+            <div><label>التصنيف</label><input type="text" data-wfield="type" data-widx="${idx}" value="${esc(it.type)}" /></div>
+            <div><label>السنة</label><input type="text" data-wfield="date" data-widx="${idx}" value="${esc(it.date)}" /></div>
+          </div>
+          <div style="margin-top:10px;"><label>المحتوى</label><textarea data-wfield="summary" data-widx="${idx}">${esc(it.summary)}</textarea></div>
+          <div style="margin-top:10px;"><label>رابط الصورة</label><input type="text" data-wfield="image" data-widx="${idx}" value="${esc(it.image)}" /></div>
+          ${it.image ? `<img class="thumb" src="${esc(it.image)}" alt="" />` : ""}
+        `;
+        box.appendChild(div);
+      });
+      box.querySelectorAll("[data-wfield]").forEach((el) => {
+        el.addEventListener("input", (e) => {
+          state.items[Number(e.target.dataset.widx)][e.target.dataset.wfield] = e.target.value;
+        });
+      });
+      box.querySelectorAll("[data-wdel]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          state.items.splice(Number(e.target.dataset.wdel), 1);
+          renderWorks();
+        });
+      });
+    }
+
+    $("unlockBtn").addEventListener("click", async () => {
+      const pass = $("passInput").value.trim();
+      const tok = $("tokenInput").value.trim();
+      if (pass !== PASS_CODE) {
+        showMsg($("gateMsg"), "كلمة السر غير صحيحة.", "err");
+        return;
+      }
+      if (!tok) {
+        showMsg($("gateMsg"), "أدخل رمز GitHub Token.", "err");
+        return;
+      }
+      token = tok;
+      showMsg($("gateMsg"), "جاري التحقق...", "ok");
+      try {
+        await loadData();
+        sessionStorage.setItem("stage_tok", token);
+        $("gateCard").classList.add("hidden");
+        $("workspace").classList.remove("hidden");
+        $("logoutBtn").classList.remove("hidden");
+      } catch (e) {
+        token = "";
+        showMsg($("gateMsg"), e.message, "err");
+      }
+    });
+
+    $("logoutBtn").addEventListener("click", () => {
+      sessionStorage.removeItem("stage_tok");
+      token = "";
+      $("workspace").classList.add("hidden");
+      $("logoutBtn").classList.add("hidden");
+      $("gateCard").classList.remove("hidden");
+      $("passInput").value = "";
+    });
+
+    $("addGalBtn").addEventListener("click", async () => {
+      try {
+        let img = $("galUrl").value.trim();
+        const f = $("galFile").files[0];
+        if (f) img = await uploadFile(f);
+        if (!img) return showMsg($("saveMsg"), "اختر صورة أو ضع رابطاً للمشهد.", "err");
+        state.gallery.push({ caption: $("galCaption").value.trim() || "مشهد مسرحي", image: img });
+        $("galCaption").value = "";
+        $("galUrl").value = "";
+        $("galFile").value = "";
+        renderGallery();
+        showMsg($("saveMsg"), "أُضيف المشهد. اضغط حفظ ونشر للتثبيت.", "ok");
+      } catch (e) {
+        showMsg($("saveMsg"), e.message, "err");
+      }
+    });
+
+    $("addWorkBtn").addEventListener("click", async () => {
+      try {
+        const title = $("newTitle").value.trim();
+        const summary = $("newSummary").value.trim();
+        if (!title && !summary) return showMsg($("saveMsg"), "اكتب عنواناً أو نصاً.", "err");
+        let img = $("newImgUrl").value.trim();
+        const f = $("newImgFile").files[0];
+        if (f) img = await uploadFile(f);
+        state.items.unshift({
+          id: `w-${Date.now()}`,
+          type: $("newType").value,
+          title,
+          summary,
+          image: img,
+          date: $("newDate").value.trim() || "2026"
+        });
+        $("newTitle").value = "";
+        $("newSummary").value = "";
+        $("newImgUrl").value = "";
+        $("newImgFile").value = "";
+        renderWorks();
+        showMsg($("saveMsg"), "أُضيف العمل. اضغط حفظ ونشر للتثبيت.", "ok");
+      } catch (e) {
+        showMsg($("saveMsg"), e.message, "err");
+      }
+    });
+
+    $("publishBtn").addEventListener("click", async () => {
+      state.siteTitle = $("siteTitle").value.trim();
+      state.welcomeLabel = $("welcomeLabel").value.trim();
+      state.heroTitle = $("heroTitle").value.trim();
+      state.heroSubtitle = $("heroSubtitle").value.trim();
+      state.aboutTitle = $("aboutTitle").value.trim();
+      state.aboutText = $("aboutText").value.trim();
+      showMsg($("saveMsg"), "جاري النشر...", "ok");
+      try {
+        const res = await ghApi(`/contents/${DATA_PATH}`, {
+          method: "PUT",
+          body: JSON.stringify({
+            message: "تحديث المنصة المسرحية",
+            content: toB64(JSON.stringify(state, null, 2)),
+            sha,
+            branch: BRANCH
+          })
+        });
+        sha = res.content.sha;
+        showMsg($("saveMsg"), "تم النشر بنجاح.", "ok");
+      } catch (e) {
+        showMsg($("saveMsg"), e.message, "err");
+      }
+    });
+
+    $("refreshBtn").addEventListener("click", () => loadData().catch((e) => showMsg($("saveMsg"), e.message, "err")));
+
+    const savedTok = sessionStorage.getItem("stage_tok");
+    if (savedTok) $("tokenInput").value = savedTok;
+  </script>
+</body>
+</html>
